@@ -1,36 +1,58 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+## Mongo DB setup
+According to the document of mongo db connection module of Prisma, the mongo db should be in a replica set.
 
-First, run the development server:
+Suppose your local db file is stored in ~/projects/db/mongodb
+
+By using docker as a faster database setup, run the following command:
 
 ```bash
-npm run dev
-# or
+docker run --rm -d -p 27017:27017 -h $(hostname) --name mongo -v ~/projects/db/mongodb:/data/db mongo:latest --replSet=dbrs && sleep 5 && docker exec mongo mongosh --quiet --eval "rs.initiate();"
+```
+
+Remember to replace the host directory for the "~/projects/db/mongodb" for your own settings.
+
+Reference article for the single replica mongoDB local development environment.
+
+https://nmihaylov.medium.com/setting-up-a-local-mongodb-replica-set-with-a-single-node-e04fb3213123
+
+
+## Getting Started
+1. First, copy the local env-example file in the project root and rename it to ".env".
+
+```
+DATABASE_URL=mongodb://127.0.0.1:27017/restaurant?replicaSet=dbrs
+NEXTAUTH_SECRET=
+
+GITHUB_ID=
+GITHUB_SECRET=
+LOG_FILE=app.log
+```
+
+If you are in local development environment, the DATABASE_URL should be unchanged.
+
+Fill in the NEXTAUTH_SECRET as randomly as you want.
+
+2. run the following commands to initialize and push the Prisma schema into mongodb
+
+```bash
+yarn
+
+npx prisma db push 
+
+npx prisma generate 
+```
+
+3. run the development server:
+
+```bash
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. You should register your first account. For the demo purpose, the first account that is registered will automatically be an admin account.
+5. Admin can create tables first, then users can create reservations based on the date selection on the top.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
